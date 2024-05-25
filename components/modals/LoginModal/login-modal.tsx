@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Button from "@/components/ui/button/button";
 import {
   Form,
@@ -12,11 +13,15 @@ import useLoginModal from "@/hooks/UseLoginModal/useLoginModal";
 import useRegisterModal from "@/hooks/UseRegisterModal/userRegisterModal";
 import { loginSchema } from "@/lib/validation/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useCallback } from "react";
+import axios from "axios";
+import { AlertCircle } from "lucide-react";
+import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 export default function LoginModal() {
+  const [error, setError] = useState("");
+
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
 
@@ -33,8 +38,19 @@ export default function LoginModal() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
+    try {
+      const { data } = await axios.post("/api/auth/login", values);
+      if (data?.success) {
+        loginModal.onClose();
+      }
+    } catch (error: any) {
+      if (error?.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError("Something went wrong, please try again later.");
+      }
+    }
   }
 
   const { isSubmitting } = form.formState;
@@ -42,6 +58,13 @@ export default function LoginModal() {
   const bodyContent = (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 px-12">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <h3 className="text-2xl font-semibold text-white">Sign in</h3>
         <FormField
           control={form.control}
@@ -68,7 +91,7 @@ export default function LoginModal() {
           )}
         />
         <Button
-          label={"Register"}
+          label={"Sign in"}
           type="submit"
           secondary
           fullWidth
