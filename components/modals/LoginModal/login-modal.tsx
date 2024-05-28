@@ -15,6 +15,7 @@ import { loginSchema } from "@/lib/validation/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { AlertCircle } from "lucide-react";
+import { signIn } from "next-auth/react";
 import React, { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -42,6 +43,7 @@ export default function LoginModal() {
     try {
       const { data } = await axios.post("/api/auth/login", values);
       if (data?.success) {
+        signIn("credentials", values);
         loginModal.onClose();
       }
     } catch (error: any) {

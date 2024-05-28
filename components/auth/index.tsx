@@ -9,10 +9,13 @@ import RegisterModal from "../modals/RegisterModal/register-modal";
 import useLoginModal from "@/hooks/UseLoginModal/useLoginModal";
 import useRegisterModal from "@/hooks/UseRegisterModal/userRegisterModal";
 import LoginModal from "../modals/LoginModal/login-modal";
+import { signIn, useSession } from "next-auth/react";
 
 export default function Auth() {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
+
+  const { data } = useSession();
 
   const onOpenRegisterModal = useCallback(() => {
     registerModal.onOpen();
@@ -44,6 +47,7 @@ export default function Auth() {
             <h2 className="font-bold text-3xl mb-4">Join today.</h2>
             <div className="flex flex-col space-y-2">
               <Button
+                onClick={() => signIn("google")}
                 label={
                   <div className="flex gap-2 items-center justify-center">
                     <FcGoogle />
@@ -54,6 +58,7 @@ export default function Auth() {
                 secondary
               />
               <Button
+                onClick={() => signIn("github")}
                 label={
                   <div className="flex gap-2 items-center justify-center">
                     <AiFillGithub />
@@ -85,7 +90,12 @@ export default function Auth() {
             <h3 className="font-medium text-xl mb-4">
               Already have an account?
             </h3>
-            <Button onClick={onOpenLoginModal} label="Sign in" fullWidth outline />
+            <Button
+              onClick={onOpenLoginModal}
+              label="Sign in"
+              fullWidth
+              outline
+            />
           </div>
         </div>
       </div>
