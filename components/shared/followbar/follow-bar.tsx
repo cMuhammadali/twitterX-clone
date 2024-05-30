@@ -2,10 +2,10 @@
 
 import Button from "@/components/ui/button/button";
 import { Loader2 } from "lucide-react";
-import User from "../user/user";
 import useUsers from "@/hooks/UseUsers/useUsers";
 import { IUser } from "@/types";
 import Link from "next/link";
+import User from "../user/user";
 
 function FollowBar() {
   const { isLoading, users } = useUsers(5);
