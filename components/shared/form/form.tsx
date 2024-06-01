@@ -3,38 +3,55 @@ import Button from "@/components/ui/button/button";
 import { toast } from "@/components/ui/use-toast";
 import { IPost, IUser } from "@/types";
 import axios from "axios";
-import { NextResponse } from "next/server";
 import { Dispatch, SetStateAction, useState } from "react";
 
 interface Props {
   placeholder: string;
   user: IUser;
   setPosts: Dispatch<SetStateAction<IPost[]>>;
+  postId?: string;
+  isComment?: boolean;
 }
 
-function Form({ placeholder, user, setPosts }: Props) {
+function Form({ placeholder, user, setPosts, isComment, postId }: Props) {
   const [body, setBody] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async () => {
     try {
       setIsLoading(true);
-      const { data } = await axios.post("/api/posts", {
-        body,
-        userId: user._id,
-      });
+      if (isComment) {
+        const { data } = await axios.post("/api/comments", {
+          body,
+          userId: user._id,
+          postId,
+        });
 
-      const newPost = { ...data, user };
-      setPosts((prev) => [newPost, ...prev]);
+        const newComment = {
+          ...data,
+          user,
+          likes: 0,
+          hasLiked: false,
+        };
+        setPosts((prev) => [newComment, ...prev]);
+      } else {
+        const { data } = await axios.post("/api/posts", {
+          body,
+          userId: user._id,
+        });
+
+        const newPost = {
+          ...data,
+          user,
+          likes: 0,
+          isLiked: false,
+          comments: 0,
+        };
+        setPosts((prev) => [newPost, ...prev]);
+      }
 
       setIsLoading(false);
       setBody("");
-      toast({
-        title: "Success",
-        description: "Post created successfully.",
-      });
-
-      return NextResponse.json(data);
     } catch (error) {
       setIsLoading(false);
       toast({
@@ -66,7 +83,7 @@ function Form({ placeholder, user, setPosts }: Props) {
 
           <div className="flex mt-4 justify-end flex-row">
             <Button
-              label="Post"
+              label={isComment ? "Reply" : "Post"}
               classNames="px-8"
               disabled={isLoading || !body}
               onClick={onSubmit}
